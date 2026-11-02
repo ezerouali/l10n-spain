@@ -8,7 +8,7 @@ from datetime import datetime
 
 import pytz
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 VERIFACTU_VALID_INVOICE_STATES = ["posted"]
@@ -383,7 +383,7 @@ class AccountMove(models.Model):
         )
         req_tax = re_lines.mapped("tax_ids") & taxes_req
         if len(req_tax) > 1:
-            raise UserError(_("There's a mismatch in taxes for RE. Check them."))
+            raise UserError(self.env._("There's a mismatch in taxes for RE. Check them."))
         return req_tax
 
     def _get_verifactu_taxes_and_total(self):
@@ -422,7 +422,7 @@ class AccountMove(models.Model):
             elif tax in excluded_taxes:
                 not_in_taxes += tax_line["amount"]
             elif tax not in taxes_RE:
-                raise UserError(_("%s tax is not mapped to VERI*FACTU.", tax.name))
+                raise UserError(self.env._("%s tax is not mapped to VERI*FACTU.", tax.name))
         amount_tax = self.amount_tax_signed - not_in_taxes
         amount_total = self.amount_total_signed - not_in_amount_total
         return (taxes_dict, amount_tax, amount_total)
@@ -482,15 +482,15 @@ class AccountMove(models.Model):
             suffixes = []
         # Too restrictive limitation
         # if not self.fiscal_position_id:
-        #     suffixes.append(_("- It does not have a fiscal position."))
+        #     suffixes.append(self.env._("- It does not have a fiscal position."))
         if not self.verifactu_tax_key:
-            suffixes.append(_("- It does not have a tax key."))
+            suffixes.append(self.env._("- It does not have a tax key."))
         if not self.verifactu_registration_key:
-            suffixes.append(_("- It does not have a registration key."))
+            suffixes.append(self.env._("- It does not have a registration key."))
         if not self._check_inconsistent_taxes():
-            suffixes.append(_("- There are some inconsistent taxes on lines."))
+            suffixes.append(self.env._("- There are some inconsistent taxes on lines."))
         if not self._check_all_taxes_mapped():
-            suffixes.append(_("- It does not have all taxes mapped."))
+            suffixes.append(self.env._("- It does not have all taxes mapped."))
         return super()._check_verifactu_configuration(suffixes=suffixes)
 
     def _check_inconsistent_taxes(self):
@@ -552,11 +552,11 @@ class AccountMove(models.Model):
         ):
             if invoice.move_type in ["out_invoice", "out_refund"]:
                 if "invoice_date" in vals:
-                    self._raise_exception_verifactu(_("invoice date"))
+                    self._raise_exception_verifactu(self.env._("invoice date"))
                 elif "thirdparty_number" in vals:
-                    self._raise_exception_verifactu(_("third-party number"))
+                    self._raise_exception_verifactu(self.env._("third-party number"))
                 elif "name" in vals:
-                    self._raise_exception_verifactu(_("invoice number"))
+                    self._raise_exception_verifactu(self.env._("invoice number"))
         return super().write(vals)
 
     def button_cancel(self):
@@ -564,7 +564,7 @@ class AccountMove(models.Model):
             lambda inv: inv.verifactu_enabled and inv.aeat_state != "not_sent"
         )
         if invoices_sent and not self.env.context.get("verifactu_cancel"):
-            raise UserError(_("You can not cancel invoices sent to VERI*FACTU."))
+            raise UserError(self.env._("You can not cancel invoices sent to VERI*FACTU."))
         return super().button_cancel()
 
     def _check_draftable(self):
@@ -578,7 +578,7 @@ class AccountMove(models.Model):
             lambda inv: inv.verifactu_enabled and inv.aeat_state != "not_sent"
         )
         if invoices_sent and not self.env.context.get("verifactu_cancel"):
-            raise UserError(_("You can not set to draft invoices sent to VERI*FACTU."))
+            raise UserError(self.env._("You can not set to draft invoices sent to VERI*FACTU."))
         return super().button_draft()
 
     def resend_verifactu(self):

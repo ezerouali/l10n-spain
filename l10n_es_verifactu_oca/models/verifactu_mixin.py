@@ -12,8 +12,9 @@ from urllib.parse import urlencode
 import psycopg2
 import qrcode
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.fields import Domain
 from odoo.tools.float_utils import float_compare
 
 from odoo.addons.l10n_es_aeat.models.aeat_mixin import round_by_keys
@@ -180,7 +181,7 @@ class VerifactuMixin(models.AbstractModel):
                     str(value).encode("ascii")
                 except UnicodeEncodeError as uee:
                     raise UserError(
-                        _("QR URL value '{}' is not ASCII").format(value)
+                        self.env._("QR URL value '{}' is not ASCII").format(value)
                     ) from uee
             # Build QR URL
             qr_url = urlencode(qr_values, encoding="utf-8")
@@ -215,10 +216,14 @@ class VerifactuMixin(models.AbstractModel):
             )
 
     @api.model
+    def _is_unsupported_search_operator(self, operator):
+        return operator not in ("in", "not in")
+
+    @api.model
     def _search_verifactu_enabled(self, operator, value):
-        if operator not in ("=", "!="):
-            raise ValueError(_("Unsupported search operator"))
-        return [("company_id.verifactu_enabled", operator, value)]
+        if self._is_unsupported_search_operator(operator):
+            raise ValueError(self.env._("Unsupported search operator"))
+        return Domain("company_id.verifactu_enabled", operator, value)
 
     def _get_verifactu_qr_values(self):
         raise NotImplementedError
@@ -268,7 +273,7 @@ class VerifactuMixin(models.AbstractModel):
         """Datos del desarrollador del sistema informático."""
         if not self.company_id.verifactu_developer_id:
             raise UserError(
-                _("Please, configure the VERI*FACTU developer in your company")
+                self.env._("Please, configure the VERI*FACTU developer in your company")
             )
         developer = self.company_id.verifactu_developer_id
         chaining = self._get_verifactu_chaining()
@@ -300,7 +305,7 @@ class VerifactuMixin(models.AbstractModel):
         """Inheritable method for exception control when sending VERI*FACTU invoices."""
         res = super()._aeat_check_exceptions()
         if self.company_id.verifactu_enabled and not self.verifactu_enabled:
-            raise UserError(_("This invoice is not VERI*FACTU enabled."))
+            raise UserError(self.env._("This invoice is not VERI*FACTU enabled."))
         return res
 
     def _get_verifactu_date(self, date):
@@ -364,7 +369,7 @@ class VerifactuMixin(models.AbstractModel):
         except psycopg2.OperationalError as err:
             if err.pgcode == "55P03":  # could not obtain the lock
                 raise UserError(
-                    _(
+                    self.env._(
                         "Could not obtain last document sent to VERI*FACTU for "
                         "chaining %s.",
                         chaining.name,
@@ -394,26 +399,26 @@ class VerifactuMixin(models.AbstractModel):
         return ["l10n_es_aeat.aeat_tax_agency_spain"]
 
     def _check_verifactu_configuration(self, suffixes=None):
-        prefix = _("The invoice %s cannot be sent to VERI*FACTU because:")
+        prefix = self.env._("The invoice %s cannot be sent to VERI*FACTU because:")
         if not suffixes:
             suffixes = []
         if not self._get_verifactu_chaining():
             suffixes.append(
-                _("- Your company does not have a VERI*FACTU chaining configured.")
+                self.env._("- Your company does not have a VERI*FACTU chaining configured.")
             )
         if not self.company_id.tax_agency_id:
-            suffixes.append(_("- Your company does not have a tax agency configured."))
+            suffixes.append(self.env._("- Your company does not have a tax agency configured."))
         if (
             self.company_id.tax_agency_id.get_external_id
             in self._get_verifactu_accepted_tax_agencies()
         ):
-            suffixes.append(_("- Your company's tax agency is not supported."))
+            suffixes.append(self.env._("- Your company's tax agency is not supported."))
         if not self.company_id.verifactu_developer_id:
             suffixes.append(
-                _("- Your company does not have a VERI*FACTU developer configured.")
+                self.env._("- Your company does not have a VERI*FACTU developer configured.")
             )
         if not self.company_id.country_code or self.company_id.country_code != "ES":
-            suffixes.append(_("Your company is not registered in Spain."))
+            suffixes.append(self.env._("Your company is not registered in Spain."))
         if suffixes:
             raise UserError((prefix + "\n".join(suffixes)) % self[self._rec_name])
 
@@ -424,14 +429,8 @@ class VerifactuMixin(models.AbstractModel):
             .sudo()
             .with_context(active_test=False)
             .search(
-                [
-                    "|",
-                    ("date_from", "<=", date),
-                    ("date_from", "=", False),
-                    "|",
-                    ("date_to", ">=", date),
-                    ("date_to", "=", False),
-                ],
+                (Domain("date_from", "<=", date) | Domain("date_from", "=", False))
+                & (Domain("date_to", ">=", date) | Domain("date_to", "=", False)),
                 limit=1,
             )
         )
@@ -452,7 +451,7 @@ class VerifactuMixin(models.AbstractModel):
 
     def _raise_exception_verifactu(self, field_name):
         raise UserError(
-            _(
+            self.env._(
                 "You cannot change the %s of document "
                 "already registered at VERI*FACTU. You must cancel the "
                 "document and create a new one with the correct value."
@@ -470,7 +469,7 @@ class VerifactuMixin(models.AbstractModel):
             )
         except ValueError as e:
             raise UserError(
-                _(
+                self.env._(
                     "The value in l10n_es_verifactu_oca.verifactu_batch "
                     "system parameter must be an integer. Please, check the "
                     "value of the parameter."

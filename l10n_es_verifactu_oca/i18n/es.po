@@ -295,8 +295,8 @@ msgstr "Comprobar facturas incorrectas de VERI*FACTU"
 #: model:ir.model.fields,help:l10n_es_verifactu_oca.field_account_move__verifactu_macrodata
 #: model:ir.model.fields,help:l10n_es_verifactu_oca.field_verifactu_mixin__verifactu_macrodata
 msgid ""
-"Check to confirm that the document has an absolute amount greater o equal to "
-"100 000 000,00 euros."
+"Check to confirm that the document has an absolute amount greater o equal to"
+" 100 000 000,00 euros."
 msgstr ""
 "Marca para confirmar que el documento tiene un importe absoluto mayor o "
 "igual a 100 000 000,00 euros."
@@ -623,8 +623,8 @@ msgstr "Si está marcada, algunos mensajes tienen un error de envío."
 #. module: l10n_es_verifactu_oca
 #: model:ir.model.fields,help:l10n_es_verifactu_oca.field_res_company__verifactu_start_date
 msgid ""
-"If this field is set, the VERI*FACTU won't be enabled on invoices with lower "
-"invoice date. If not set, it can be enabled on all invoice dates"
+"If this field is set, the VERI*FACTU won't be enabled on invoices with lower"
+" invoice date. If not set, it can be enabled on all invoice dates"
 msgstr ""
 "Si está establecido, VERI*FACTU no estará habilitado para facturas con una "
 "fecha anterior a la establecida. Si no, estará habilitado para todas las "
@@ -637,8 +637,8 @@ msgid ""
 "sequence from the entry back to the last hashed entry. The hash can also be "
 "performed on demand by the Secure Entries wizard."
 msgstr ""
-"Si está marcado, cuando se publica un asiento, aplicamos retroactivamente el "
-"hash a todos los movimientos en la secuencia desde el asiento hasta el "
+"Si está marcado, cuando se publica un asiento, aplicamos retroactivamente el"
+" hash a todos los movimientos en la secuencia desde el asiento hasta el "
 "último asiento con hash. El hash también puede realizarse bajo demanda "
 "mediante el asistente de Asientos Seguros."
 
@@ -738,8 +738,7 @@ msgid ""
 "Invoice entries are automatically created when invoices are validated\n"
 "                with VERI*FACTU enabled."
 msgstr ""
-"Las entradas de factura se crean automáticamente cuando las facturas son "
-"validadas\n"
+"Las entradas de factura se crean automáticamente cuando las facturas son validadas\n"
 "                con VERI*FACTU habilitado."
 
 #. module: l10n_es_verifactu_oca
@@ -930,8 +929,8 @@ msgstr "Número de mensajes con un error de envío"
 #: model:ir.model.fields,help:l10n_es_verifactu_oca.field_account_move__verifactu_cancel_reason
 #: model:ir.model.fields,help:l10n_es_verifactu_oca.field_verifactu_mixin__verifactu_cancel_reason
 msgid ""
-"Optional internal reason to cancel this invoicein VERI*FACTU. This reason is "
-"not sent to VERI*FACTU"
+"Optional internal reason to cancel this invoicein VERI*FACTU. This reason is"
+" not sent to VERI*FACTU"
 msgstr ""
 "Motivo opcional para cancelar esta factura en VERI*FACTU. El motivo no se "
 "envía a VERI*FACTU"
@@ -1688,9 +1687,3 @@ msgstr "número de factura"
 #: code:addons/l10n_es_verifactu_oca/models/account_move.py:0
 msgid "third-party number"
 msgstr "número de terceros"
-
-#~ msgid "Cancelled"
-#~ msgstr "Cancelada"
-
-#~ msgid "Last Modified on"
-#~ msgstr "Última modificación el"

@@ -11,43 +11,28 @@
                 t-value="o.verifactu_enabled and o.verifactu_qr"
             />
         </xpath>
-    </template>
-    <template id="address_layout" inherit_id="web.address_layout" priority="1000">
-        <div t-attf-class="address row mb-4" position="attributes">
-            <attribute name="t-if">address and not verifactu_invoice</attribute>
-        </div>
-        <div t-attf-class="address row mb-4" position="after">
-            <div t-if="verifactu_invoice" class="row" id="verifactu_row">
-                <div
-                    id="verifactu"
-                    style="page-break-inside:avoid;"
-                    class="text-center col-3"
-                >
-                    <ul class="list-inline mb4">QR Tributario</ul>
-                    <ul id="verifactu_qr" class="list-inline mb4">
-                        <img
-                            t-attf-src="data:image/png;base64,{{o.verifactu_qr}}"
-                            style="min-width: 40mm; max-width: 40mm"
-                        />
-                    </ul>
-                    <ul class="list-inline mb4">VERI*FACTU</ul>
+        <!-- The QR is rendered at the top of the document body, right below the
+             address block laid out by `web.address_layout`. We deliberately do
+             not inherit `web.address_layout` (as done up to 18.0): it is shared
+             by every report and its internal structure changed in 19.0. -->
+        <xpath expr="//div[hasclass('invoice_main')]" position="before">
+            <div
+                id="verifactu_row"
+                class="row mb-4"
+                t-if="verifactu_invoice"
+                style="page-break-inside:avoid;"
+            >
+                <div id="verifactu" class="col-3 text-center">
+                    <strong class="d-block">QR Tributario</strong>
+                    <img
+                        id="verifactu_qr"
+                        t-attf-src="data:image/png;base64,{{o.verifactu_qr}}"
+                        style="min-width: 40mm; max-width: 40mm"
+                        alt="VERI*FACTU QR"
+                    />
+                    <strong class="d-block">VERI*FACTU</strong>
                 </div>
-                <t t-if="information_block">
-                    <t t-set="colclass" t-value="'col-5'" />
-                    <div name="information_block" class="col-4">
-                        <t t-out="information_block" />
-                    </div>
-                    <div name="address" t-att-class="colclass">
-                        <t t-esc="address" />
-                    </div>
-                </t>
-                <t t-if="not information_block">
-                    <t t-set="colclass" t-value="'col-5 offset-4'" />
-                    <div name="address" t-att-class="colclass">
-                        <t t-esc="address" />
-                    </div>
-                </t>
             </div>
-        </div>
+        </xpath>
     </template>
 </odoo>

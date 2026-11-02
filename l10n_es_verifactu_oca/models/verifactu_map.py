@@ -1,6 +1,7 @@
 # Copyright 2024 Aures TIC - Almudena de La Puente <almudena@aurestic.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-from odoo import _, api, exceptions, fields, models
+from odoo import api, exceptions, fields, models
+from odoo.fields import Domain
 
 
 class AeatVerifactuMap(models.Model):
@@ -23,34 +24,36 @@ class AeatVerifactuMap(models.Model):
 
     def _unique_date_range_one(self):
         # Based in l10n_es_aeat module
-        domain = [("id", "!=", self.id)]
+        domain = Domain("id", "!=", self.id)
         if self.date_from and self.date_to:
-            domain += [
-                "|",
-                "&",
-                ("date_from", "<=", self.date_to),
-                ("date_from", ">=", self.date_from),
-                "|",
-                "&",
-                ("date_to", "<=", self.date_to),
-                ("date_to", ">=", self.date_from),
-                "|",
-                "&",
-                ("date_from", "=", False),
-                ("date_to", ">=", self.date_from),
-                "|",
-                "&",
-                ("date_to", "=", False),
-                ("date_from", "<=", self.date_to),
-            ]
+            domain &= (
+                (
+                    Domain("date_from", "<=", self.date_to)
+                    & Domain("date_from", ">=", self.date_from)
+                )
+                | (
+                    Domain("date_to", "<=", self.date_to)
+                    & Domain("date_to", ">=", self.date_from)
+                )
+                | (
+                    Domain("date_from", "=", False)
+                    & Domain("date_to", ">=", self.date_from)
+                )
+                | (
+                    Domain("date_to", "=", False)
+                    & Domain("date_from", "<=", self.date_to)
+                )
+            )
         elif self.date_from:
-            domain += [("date_to", ">=", self.date_from)]
+            domain &= Domain("date_to", ">=", self.date_from)
         elif self.date_to:
-            domain += [("date_from", "<=", self.date_to)]
+            domain &= Domain("date_from", "<=", self.date_to)
         date_lst = self.search(domain)
         if date_lst:
             raise exceptions.UserError(
-                _("Error! The dates of the record overlap with an existing " "record.")
+                self.env._(
+                    "Error! The dates of the record overlap with an existing record."
+                )
             )
 
 
